@@ -118,6 +118,14 @@ pipeline {
             defaultValue: '1',
             description: 'Run each test N number of times, --repeat=N',
             name: 'MTR_REPEAT')
+        booleanParam(
+            defaultValue: false, 
+            description: 'Runs CI MTR tests on case-insensitive fs', 
+            name: 'ENABLE_TESTS_ON_CI_FS')
+        string(
+            defaultValue: '--do-test=_ci',
+            description: 'Test case which will run when ENABLE_TESTS_ON_CI_FS is checked',
+            name: 'MTR_ARGS_CI')
         choice(
             choices: 'docker-32gb\ndocker',
             description: 'Run build on specified instance type',
@@ -215,6 +223,26 @@ pipeline {
                         warnings canComputeNew: false, canResolveRelativePaths: false, categoriesPattern: '', defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', messagesPattern: '', parserConfigurations: [[parserName: 'GNU C Compiler 4 (gcc)', pattern: 'build.log']], unHealthy: ''
                     }
                 }
+            }
+        }
+        stage('Prepare case-insensitive fs') {
+            when {
+                expression { params.INCLUDE_CI_TESTS == true }
+            }
+            agent { label LABEL }
+            steps {
+                sh '''
+                    if [[ \$INCLUDE_CI_TESTS == true ]]; then
+                        dd if=/dev/zero of=\$WORKSPACE/mtr_disk.img bs=1G count=10
+                        mkfs.fat -O \$WORKSPACE/mtr_disk.img
+                        mkdir -p \$WORKSPACE/mtr_disk_dir
+                        
+                        tmp_uid=\$(id -u)
+                        tmp_gid=\$(id -g)
+
+                        mount -o loop -o uid=\$tmp_uid -o gid=\$tmp_gid \$WORKSPACE/mtr_disk.img \$WORKSPACE/mtr_disk_dir
+                    fi
+                '''
             }
         }
         stage('Test') {
