@@ -240,11 +240,13 @@ pipeline {
                     else
                         sudo apt-get update && sudo apt-get install -y dosfstools
                     fi
-                    sudo dd if=/dev/zero of=/mnt/mtr_disk.img bs=1G count=10
-                    sudo /sbin/mkfs.vfat /mnt/mtr_disk.img
-                    sudo mkdir -p /mnt/mtr_disk_dir
-                    
-                    sudo mount -o loop -o uid=27 -o gid=27 /mnt/mtr_disk.img /mnt/mtr_disk_dir
+                    if [[ ! -f /mnt/mtr_disk.img ]] && [[ ! -z \$(mount | grep /mnt/mtr_disk_dir) ]]; then
+                        sudo dd if=/dev/zero of=/mnt/mtr_disk.img bs=1G count=10
+                        sudo /sbin/mkfs.vfat /mnt/mtr_disk.img
+                        sudo mkdir -p /mnt/mtr_disk_dir
+                        
+                        sudo mount -o loop -o uid=27 -o gid=27 /mnt/mtr_disk.img /mnt/mtr_disk_dir
+                    fi
                 '''
             }
         }
