@@ -195,7 +195,7 @@ if [[ "${TOKUDB_ENGINES_MTR}" = 'no' ]] && [[ "${HOTBACKUP_TESTING}" = 'no' ]] &
     process_mtr_output "Percona Server - Test" "${WORKDIR_ABS}/small.output" "${WORKDIR_ABS}/small.xml"
 fi
 
-if [[ "${ENABLE_TESTS_ON_CI_FS}" = 'yes' ]]; then
+if [[ "${ENABLE_TESTS_ON_CI_FS}" = 'yes' ]] && [[ "${CMAKE_BUILD_TYPE}" = "RelWithDebInfo" ]]; then
     sudo mkdir -p /mnt/ps_mtr_tempdir /tmp/mtr_disk_dir/mtr
     sudo chown -R 27:27 /mnt/ps_mtr_tempdir /tmp/mtr_disk_dir 
  
