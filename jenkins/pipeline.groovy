@@ -227,10 +227,7 @@ pipeline {
         }
         stage('Prepare case-insensitive fs') {
             when {
-                expression { 
-                    params.ENABLE_TESTS_ON_CI_FS == 'yes',
-                    params.CMAKE_BUILD_TYPE == 'RelWithDebInfo'
-                }
+                expression { params.ENABLE_TESTS_ON_CI_FS == 'yes' && params.CMAKE_BUILD_TYPE == 'RelWithDebInfo' }
             }
             agent { label LABEL }
             steps {
