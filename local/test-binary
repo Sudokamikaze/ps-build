@@ -203,7 +203,7 @@ if [[ "${ENABLE_TESTS_ON_CI_FS}" = 'yes' ]] && [[ "${CMAKE_BUILD_TYPE}" = "RelWi
         --force \
         --max-test-fail=0 \
         --tmpdir="/mnt/ps_mtr_tempdir/" \
-        --valdir="/tmp/mtr_disk_dir/mtr/" \
+        --vardir="/tmp/mtr_disk_dir/mtr/" \
         ${MTR_ARGS_CI} \
         | tee ${WORKDIR_ABS}/ci_fs.output || true
     process_mtr_output "Percona Server - Test" "${WORKDIR_ABS}/ci_fs.output" "${WORKDIR_ABS}/ci_fs.xml"
