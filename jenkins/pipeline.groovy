@@ -221,27 +221,6 @@ pipeline {
                 }
             }
         }
-        stage('Prepare case-insensitive fs') {
-            when {
-                expression { params.ENABLE_TESTS_ON_CI_FS == 'yes' }
-            }
-            agent { label LABEL }
-            steps {
-                sh '''
-                    if [[ -f /usr/bin/yum ]]; then
-                        sudo yum -y install dosfstools
-                    else
-                        sudo apt-get update && sudo apt-get install -y dosfstools
-                    fi
-                    if [[ ! -f /mnt/mtr_disk_\$CMAKE_BUILD_TYPE.img ]] && [[ -z \$(mount | grep /mnt/mtr_disk_dir_\$CMAKE_BUILD_TYPE) ]]; then
-                        sudo dd if=/dev/zero of=/mnt/mtr_disk_\$CMAKE_BUILD_TYPE.img bs=1G count=10
-                        sudo /sbin/mkfs.vfat /mnt/mtr_disk_\$CMAKE_BUILD_TYPE.img
-                        sudo mkdir -p /mnt/mtr_disk_dir_\$CMAKE_BUILD_TYPE
-                        sudo mount -o loop -o uid=27 -o gid=27 -o umask=003 -o check=r /mnt/mtr_disk_\$CMAKE_BUILD_TYPE.img /mnt/mtr_disk_dir_\$CMAKE_BUILD_TYPE
-                    fi
-                '''
-            }
-        }
         stage('Test') {
             agent { label LABEL }
             steps {
@@ -250,6 +229,19 @@ pipeline {
                         git branch: '8.0-PS-7267-testingground', url: 'https://github.com/Sudokamikaze/ps-build'
                         withCredentials([string(credentialsId: 'MTR_VAULT_TOKEN', variable: 'MTR_VAULT_TOKEN')]) {
                             sh '''
+                                if [[ -f /usr/bin/yum ]]; then
+                                    sudo yum -y install dosfstools
+                                else
+                                    sudo apt-get update && sudo apt-get install -y dosfstools
+                                fi
+                                if [[ ! -f /mnt/mtr_disk_\$CMAKE_BUILD_TYPE.img ]]; then
+                                    sudo dd if=/dev/zero of=/mnt/mtr_disk_\$CMAKE_BUILD_TYPE.img bs=1G count=10
+                                    sudo losetup -fP /mnt/mtr_disk_\$CMAKE_BUILD_TYPE.img
+                                    lodisk=$(sudo losetup -a | grep mtr_disk_\$CMAKE_BUILD_TYPE.img | awk '{print $1}' | sed 's/://g')
+                                    sudo /sbin/mkfs.vfat \$lodisk
+                                    sudo docker volume create --driver local --opt type=vfat --opt device=\$lodisk --opt o=uid=27,gid=27,check=r,utf8=true mtr_disk_\$CMAKE_BUILD_TYPE
+                                fi
+
                                 sudo git reset --hard
                                 sudo git clean -xdf
                                 rm -rf sources/results
