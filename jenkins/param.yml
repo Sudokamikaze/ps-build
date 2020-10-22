@@ -1,5 +1,5 @@
 - job:
-    name: percona-server-8.0-param
+    name: percona-server-8.0-param-zlib
     project-type: matrix
     defaults: global
     description: |
@@ -150,7 +150,7 @@
           - debian:buster
     builders:
     - trigger-builds:
-      - project: percona-server-8.0-pipeline
+      - project: percona-server-8.0-pipeline-zlib
         current-parameters: true
         predefined-parameters: |
           DOCKER_OS=${DOCKER_OS}
@@ -163,12 +163,12 @@
     - shell: |
         sudo find . -name "*.xml" -o -name "*.log" -delete
     - copyartifact:
-        project: percona-server-8.0-pipeline
+        project: percona-server-8.0-pipeline-zlib
         which-build: specific-build
-        build-number: "${TRIGGERED_BUILD_NUMBERS_percona_server_8_0_pipeline}"
+        build-number: "${TRIGGERED_BUILD_NUMBERS_percona_server_8_0_pipeline-zlib}"
         do-not-fingerprint: true
     - shell: |
-        echo "${TRIGGERED_BUILD_NUMBERS_percona_server_8_0_pipeline}" > PIPELINE_BUILD_NUMBER
+        echo "${TRIGGERED_BUILD_NUMBERS_percona_server_8_0_pipeline-zlib}" > PIPELINE_BUILD_NUMBER
         gunzip build.log.gz
     publishers:
     - warnings:
