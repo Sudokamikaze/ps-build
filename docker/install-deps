@@ -251,7 +251,7 @@ storage "consul" {
 }
 
 api_addr = "http://127.0.0.1:9300"
-cluster_addr = "https://127.0.0.1:9300"
+cluster_addr = "https://127.0.0.1:9301"
 EOF
 
 cat <<-EOF | tee /etc/vault.d-1.5.4-prod/config.hcl
@@ -267,7 +267,7 @@ storage "consul" {
 }
 
 api_addr = "http://127.0.0.1:9500"
-cluster_addr = "https://127.0.0.1:9500"
+cluster_addr = "https://127.0.0.1:9501"
 EOF
 
 # Consul
