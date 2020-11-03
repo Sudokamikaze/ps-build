@@ -196,6 +196,35 @@ if [[ "${TOKUDB_ENGINES_MTR}" = 'no' ]] && [[ "${HOTBACKUP_TESTING}" = 'no' ]] &
 fi
 
 if [[ "${KEYRING_VAULT_MTR}" == 'yes' ]]; then
+    sudo supervisord
+
+    # Required to initialize everything
+    sleep 5
+
+    if [[ ! -z $(supervisorctl status | grep FAILED) ]]; then
+        echo Some process have failed:
+        supervisorctl status
+        exit 1
+    fi
+
+    VAULT_V1_PROD_UNSEAL_KEYS=$(/usr/local/bin/vault.0.9.6 operator init -address='http://127.0.0.1:9300')
+    VAULT_V2_PROD_UNSEAL_KEYS=$(/usr/local/bin/vault.1.5.4 operator init -address='http://127.0.0.1:9500')
+
+    VAULT_V1_PROD_UNSEAL_KEYS=$(cat /tmp/results/vault.0.9.6-prod.log | grep Unseal Key | awk -F ':' '{print $2}')
+    VAULT_V2_PROD_UNSEAL_KEYS=$(cat /tmp/results/vault.1.5.4-prod.log | grep Unseal Key | awk -F ':' '{print $2}')
+    export VAULT_V1_PROD_TOKEN=$(cat /tmp/results/vault.0.9.6-prod.log | grep Initial Root Token | awk -F ':' '{print $2}')
+    export VAULT_V2_PROD_TOKEN=$(cat /tmp/results/vault.1.5.4-prod.log | grep Initial Root Token | awk -F ':' '{print $2}')
+
+    for key in $VAULT_V1_PROD_UNSEAL_KEYS; do
+        /usr/local/bin/vault.0.9.6 operator unseal -address='http://127.0.0.1:9300' $key
+        sleep 1
+    done
+    
+    for key in $VAULT_V2_PROD_UNSEAL_KEYS; do
+        /usr/local/bin/vault.1.5.4 operator unseal -address='http://127.0.0.1:9500' $key
+        sleep 1
+    done
+
     echo "Running tests with Hashicorp Vault in Dev mode"
     iteration=0
     for vault in $VAULT_V{1..2}_DEV_ADDRESS; do

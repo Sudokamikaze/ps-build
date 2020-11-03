@@ -27,37 +27,12 @@ docker run --rm \
     export MTR_REPEAT='${MTR_REPEAT}'
     export MTR_VAULT_TOKEN='${MTR_VAULT_TOKEN}'
     export KEYRING_VAULT_MTR='${KEYRING_VAULT_MTR}
-
-    if [[ ${KEYRING_VAULT_MTR} == 'yes' ]]; then
-        export VAULT_V1_DEV_ADDRESS=http://127.0.0.1:9200
-        export VAULT_V1_PROD_ADDRESS=https://127.0.0.1:9300
-        export VAULT_V2_DEV_ADDRESS=http://127.0.0.1:9400
-        export VAULT_V2_PROD_ADDRESS=https://127.0.0.1:9500
-        export VAULT_V1_DEV_TOKEN=${VAULT_V1_DEV_TOKEN}
-        export VAULT_V2_DEV_TOKEN=${VAULT_V2_DEV_TOKEN}
-        sudo supervisord
-
-        # Required to initialize everything
-        sleep 5
-
-        VAULT_V1_PROD_KEYS=$(/usr/local/bin/vault.0.9.6 operator init -address="http://127.0.0.1:9300")
-        VAULT_V2_PROD_KEYS=$(/usr/local/bin/vault.1.5.4 operator init -address="http://127.0.0.1:9500")
-
-        VAULT_V1_PROD_UNSEAL_KEYS=$(cat /tmp/results/vault.0.9.6-prod.log | grep Unseal Key | awk -F ':' '{print $2}')
-        VAULT_V2_PROD_UNSEAL_KEYS=$(cat /tmp/results/vault.1.5.4-prod.log | grep Unseal Key | awk -F ':' '{print $2}')
-        export VAULT_V1_PROD_TOKEN=$(cat /tmp/results/vault.0.9.6-prod.log | grep Initial Root Token | awk -F ':' '{print $2}')
-        export VAULT_V2_PROD_TOKEN=$(cat /tmp/results/vault.1.5.4-prod.log | grep Initial Root Token | awk -F ':' '{print $2}')
-
-        for key in $VAULT_V1_PROD_UNSEAL_KEYS; do
-            /usr/local/bin/vault.0.9.6 operator unseal -address='http://127.0.0.1:9300' $key
-            sleep 1
-        done
-        
-        for key in $VAULT_V2_PROD_UNSEAL_KEYS; do
-            /usr/local/bin/vault.1.5.4 operator unseal -address='http://127.0.0.1:9500' $key
-            sleep 1
-        done
-    fi
+    export VAULT_V1_DEV_ADDRESS=http://127.0.0.1:9200
+    export VAULT_V1_PROD_ADDRESS=https://127.0.0.1:9300
+    export VAULT_V2_DEV_ADDRESS=http://127.0.0.1:9400
+    export VAULT_V2_PROD_ADDRESS=https://127.0.0.1:9500
+    export VAULT_V1_DEV_TOKEN=${VAULT_V1_DEV_TOKEN}
+    export VAULT_V2_DEV_TOKEN=${VAULT_V2_DEV_TOKEN}
 
     cp /tmp/ps/results/*.tar.gz /tmp/results
 
