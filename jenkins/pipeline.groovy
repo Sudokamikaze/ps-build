@@ -167,7 +167,7 @@ pipeline {
                     fi
                     rm -f ${WORKSPACE}/VERSION-${BUILD_NUMBER}
                 '''
-                git branch: '5.7', url: 'https://github.com/Percona-Lab/ps-build'
+                git branch: '5.0-PS-7382-testingground', url: 'https://github.com/Sudokamikaze/ps-build'
                 sh '''
                     git reset --hard
                     git clean -xdf
@@ -223,7 +223,7 @@ pipeline {
             options { retry(3) }
             agent { label LABEL }
             steps {
-                git branch: '5.7', url: 'https://github.com/Percona-Lab/ps-build'
+                git branch: '5.0-PS-7382-testingground', url: 'https://github.com/Sudokamikaze/ps-build'
                 withCredentials([
                     string(credentialsId: 'MTR_VAULT_TOKEN', variable: 'MTR_VAULT_TOKEN'),
                     string(credentialsId: 'VAULT_V1_DEV_TOKEN', variable: 'VAULT_V1_DEV_TOKEN'),
