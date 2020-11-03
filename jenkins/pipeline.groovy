@@ -119,6 +119,10 @@ pipeline {
             description: 'Run each test N number of times, --repeat=N',
             name: 'MTR_REPEAT')
         choice(
+            choices: 'yes\nno',
+            description: 'Run mtr --suite=keyring_vault',
+            name: 'KEYRING_VAULT_MTR')
+        choice(
             choices: 'docker-32gb\ndocker',
             description: 'Run build on specified instance type',
             name: 'LABEL')

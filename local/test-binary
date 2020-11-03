@@ -195,4 +195,39 @@ if [[ "${TOKUDB_ENGINES_MTR}" = 'no' ]] && [[ "${HOTBACKUP_TESTING}" = 'no' ]] &
     process_mtr_output "Percona Server - Test" "${WORKDIR_ABS}/small.output" "${WORKDIR_ABS}/small.xml"
 fi
 
+if [[ "${KEYRING_VAULT_MTR}" == 'yes' ]]; then
+    echo "Running tests with Hashicorp Vault in Dev mode"
+    iteration=0
+    for vault in $VAULT_V{1..2}_DEV_ADDRESS; do
+        for vault_token in $VAULT_V{1..2}_DEV_TOKEN; do
+            iteration=$((iteration+1))
+            MTR_VAULT_ADDRESS=$vault \
+            MTR_VAULT_TOKEN=$vault_token \
+            MTR_BUILD_THREAD=auto ./mtr \
+                --force \
+                --max-test-fail=0 \
+                --suite=keyring_vault \
+                | tee ${WORKDIR_ABS}/keyring_vault_dev_v$iteration.output || true
+            process_mtr_output "Percona Server - Keyring Vault Dev V$iteration" "${WORKDIR_ABS}/keyring_vault_dev_v$iteration.output.output" "${WORKDIR_ABS}/keyring_vault_dev_v$iteration.output.xml"
+        done
+    done
+
+    echo "Running tests with Hashicorp Vault in Production mode"
+    iteration=0
+    for vault in $VAULT_V{1..2}_PROD_ADDRESS; do
+        for vault_token in $VAULT_V{1..2}_PROD_TOKEN; do
+            iteration=$((iteration+1))
+            MTR_VAULT_ADDRESS=$vault \
+            MTR_VAULT_TOKEN=$vault_token \
+            MTR_BUILD_THREAD=auto ./mtr \
+                --force \
+                --max-test-fail=0 \
+                --suite=keyring_vault \
+                | tee ${WORKDIR_ABS}/keyring_vault_prod_v$iteration.output || true
+            process_mtr_output "Percona Server - Keyring Vault Prod V$iteration" "${WORKDIR_ABS}/keyring_vault_prod_v$iteration.output.output" "${WORKDIR_ABS}/keyring_vault_prod_v$iteration.output.xml"
+        done
+    done
+
+fi
+
 exit $status
