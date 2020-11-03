@@ -26,7 +26,7 @@ docker run --rm \
     export MTR_ARGS='${MTR_ARGS}'
     export MTR_REPEAT='${MTR_REPEAT}'
     export MTR_VAULT_TOKEN='${MTR_VAULT_TOKEN}'
-    export KEYRING_VAULT_MTR='${KEYRING_VAULT_MTR}
+    export KEYRING_VAULT_MTR='${KEYRING_VAULT_MTR}'
     export VAULT_V1_DEV_ADDRESS=http://127.0.0.1:9200
     export VAULT_V1_PROD_ADDRESS=https://127.0.0.1:9300
     export VAULT_V2_DEV_ADDRESS=http://127.0.0.1:9400
