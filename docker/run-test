@@ -16,6 +16,7 @@ docker run --rm \
     set -o errexit
     set -o xtrace
 
+    mkdir /tmp/results
     export CMAKE_BUILD_TYPE='${CMAKE_BUILD_TYPE}'
     export ANALYZER_OPTS='${ANALYZER_OPTS}'
     export DEFAULT_TESTING='${DEFAULT_TESTING}'
@@ -26,7 +27,35 @@ docker run --rm \
     export MTR_REPEAT='${MTR_REPEAT}'
     export MTR_VAULT_TOKEN='${MTR_VAULT_TOKEN}'
 
-    mkdir /tmp/results
+    export VAULT_V1_DEV_ADDRESS=http://127.0.0.1:9200
+    export VAULT_V1_PROD_ADDRESS=https://127.0.0.1:9300
+    export VAULT_V2_DEV_ADDRESS=http://127.0.0.1:9400
+    export VAULT_V2_PROD_ADDRESS=https://127.0.0.1:9500
+    export VAULT_V1_DEV_TOKEN=${VAULT_V1_DEV_TOKEN}
+    export VAULT_V2_DEV_TOKEN=${VAULT_V2_DEV_TOKEN}
+    supervisord
+
+    # Required to initialize everything
+    sleep 5
+
+    VAULT_V1_PROD_KEYS=$(/usr/local/bin/vault.0.9.6 operator init -address="http://127.0.0.1:9300")
+    VAULT_V2_PROD_KEYS=$(/usr/local/bin/vault.1.5.4 operator init -address="http://127.0.0.1:9500")
+
+    VAULT_V1_PROD_UNSEAL_KEYS=$(cat /tmp/results/vault.0.9.6-prod.log | grep Unseal Key | awk -F ':' '{print $2}')
+    VAULT_V2_PROD_UNSEAL_KEYS=$(cat /tmp/results/vault.1.5.4-prod.log | grep Unseal Key | awk -F ':' '{print $2}')
+    export VAULT_V1_PROD_TOKEN=$(cat /tmp/results/vault.0.9.6-prod.log | grep Initial Root Token | awk -F ':' '{print $2}')
+    export VAULT_V2_PROD_TOKEN=$(cat /tmp/results/vault.1.5.4-prod.log | grep Initial Root Token | awk -F ':' '{print $2}')
+
+    for key in $VAULT_V1_PROD_UNSEAL_KEYS; do
+        /usr/local/bin/vault.0.9.6 operator unseal -address='http://127.0.0.1:9300' $key
+        sleep 1
+    done
+    
+    for key in $VAULT_V2_PROD_UNSEAL_KEYS; do
+        /usr/local/bin/vault.1.5.4 operator unseal -address='http://127.0.0.1:9500' $key
+        sleep 1
+    done
+
     cp /tmp/ps/results/*.tar.gz /tmp/results
 
     bash -x /tmp/scripts/test-binary /tmp/results

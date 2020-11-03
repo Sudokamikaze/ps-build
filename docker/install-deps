@@ -228,21 +228,20 @@ wget_loop 'vault_1.5.4.zip' 'https://releases.hashicorp.com/vault/1.5.4/vault_1.
 # Consul is stronly adviced to use as a backend for Vault in production mode
 wget_loop 'consul_1.8.5.zip' 'https://releases.hashicorp.com/consul/1.8.5/consul_1.8.5_linux_amd64.zip'
 
-unzip vault_0.9.6.zip && mv vault /usr/local/bin/vault.0.9.6
-unzip vault_1.5.4.zip && mv vault /usr/local/bin/vault.1.5.4
-unzip consul_1.8.5.zip && mv consul /usr/local/bin/consul
-setcap cap_ipc_lock=+ep /usr/local/bin/vault.0.9.6 /usr/local/bin/vault.1.5.4 /usr/local/bin/consul
+unzip vault_0.9.6.zip && mv vault /usr/local/bin/vault.0.9.6 && setcap cap_ipc_lock=+ep /usr/local/bin/vault.0.9.6
+unzip vault_1.5.4.zip && mv vault /usr/local/bin/vault.1.5.4 && setcap cap_ipc_lock=+ep /usr/local/bin/vault.1.5.4
+unzip consul_1.8.5.zip && mv consul /usr/local/bin/consul && setcap cap_ipc_lock=+ep /usr/local/bin/consul
 
 # Vault
-useradd --system --home /etc/vault.d-0.9.6-dev --shell /bin/false vault-0.9.6-dev
-useradd --system --home /etc/vault.d-1.5.4-dev --shell /bin/false vault.1.5.4-dev
-useradd --system --home /etc/vault.d-0.9.6-prod --shell /bin/false vault.0.9.6-prod
-useradd --system --home /etc/vault.d-1.5.4-prod --shell /bin/false vault.1.5.4-prod
+useradd -m --system --home /etc/vault.d-0.9.6-dev --shell /bin/false vault-0.9.6-dev
+useradd -m --system --home /etc/vault.d-1.5.4-dev --shell /bin/false vault-1.5.4-dev
+useradd -m --system --home /etc/vault.d-0.9.6-prod --shell /bin/false vault-0.9.6-prod
+useradd -m --system --home /etc/vault.d-1.5.4-prod --shell /bin/false vault-1.5.4-prod
 
 cat <<-EOF | tee /etc/vault.d-0.9.6-prod/config.hcl
 listener "tcp" {
-  address          = "127.0.0.1:8300"
-  cluster_address  = "127.0.0.1:8301"
+  address          = "127.0.0.1:9300"
+  cluster_address  = "127.0.0.1:9301"
   tls_disable      = "true"
 }
 
@@ -250,12 +249,15 @@ storage "consul" {
   address = "127.0.0.1:8500"
   path    = "vault-0-prod/"
 }
+
+api_addr = "http://127.0.0.1:9300"
+cluster_addr = "https://127.0.0.1:9300"
 EOF
 
 cat <<-EOF | tee /etc/vault.d-1.5.4-prod/config.hcl
 listener "tcp" {
-  address          = "127.0.0.1:8500"
-  cluster_address  = "127.0.0.1:8501"
+  address          = "127.0.0.1:9500"
+  cluster_address  = "127.0.0.1:9501"
   tls_disable      = "true"
 }
 
@@ -263,10 +265,13 @@ storage "consul" {
   address = "127.0.0.1:8500"
   path    = "vault-1-prod/"
 }
+
+api_addr = "http://127.0.0.1:9500"
+cluster_addr = "https://127.0.0.1:9500"
 EOF
 
 # Consul
-useradd --system --home /etc/consul.d --shell /bin/false consul
+useradd -m --system --home /etc/consul.d --shell /bin/false consul
 mkdir -p /var/consul/data && chown -R consul:consul /var/consul/
 
 cat <<-EOF | tee /etc/consul.d/config.json
@@ -277,11 +282,11 @@ cat <<-EOF | tee /etc/consul.d/config.json
   "data_dir": "/var/consul/data",
   "bind_addr": "127.0.0.1",
   "client_addr": "127.0.0.1",
-  "advertise_addr": "127.0.0.1,
-  "bootstrap_expect": 3,
+  "advertise_addr": "127.0.0.1",
+  "bootstrap_expect": 1,
   "retry_join": ["127.0.0.1"],
   "ui": false,
-  "log_level": "WARN",
+  "log_level": "INFO",
   "enable_syslog": false,
   "acl_enforce_version_8": false
 }
