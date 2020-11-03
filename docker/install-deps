@@ -228,9 +228,9 @@ wget_loop 'vault_1.5.4.zip' 'https://releases.hashicorp.com/vault/1.5.4/vault_1.
 # Consul is stronly adviced to use as a backend for Vault in production mode
 wget_loop 'consul_1.8.5.zip' 'https://releases.hashicorp.com/consul/1.8.5/consul_1.8.5_linux_amd64.zip'
 
-unzip vault_0.9.6.zip && mv vault /usr/local/bin/vault.0.9.6 && setcap cap_ipc_lock=+ep /usr/local/bin/vault.0.9.6 && rm vault_0.9.6.zip
-unzip vault_1.5.4.zip && mv vault /usr/local/bin/vault.1.5.4 && setcap cap_ipc_lock=+ep /usr/local/bin/vault.1.5.4 && rm vault_1.5.4.zip
-unzip consul_1.8.5.zip && mv consul /usr/local/bin/consul && setcap cap_ipc_lock=+ep /usr/local/bin/consul && rm consul_1.8.5.zip
+unzip /tmp/source_downloads/vault_0.9.6.zip && mv vault /usr/local/bin/vault.0.9.6 && setcap cap_ipc_lock=+ep /usr/local/bin/vault.0.9.6 && rm /tmp/source_downloads/vault_0.9.6.zip
+unzip /tmp/source_downloads/vault_1.5.4.zip && mv vault /usr/local/bin/vault.1.5.4 && setcap cap_ipc_lock=+ep /usr/local/bin/vault.1.5.4 && rm /tmp/source_downloads/vault_1.5.4.zip
+unzip /tmp/source_downloads/consul_1.8.5.zip && mv consul /usr/local/bin/consul && setcap cap_ipc_lock=+ep /usr/local/bin/consul && rm /tmp/source_downloads/consul_1.8.5.zip
 
 # Vault
 useradd -m --system --home /etc/vault.d-0.9.6-dev --shell /bin/false vault-0.9.6-dev
