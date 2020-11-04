@@ -196,6 +196,7 @@ if [[ "${TOKUDB_ENGINES_MTR}" = 'no' ]] && [[ "${HOTBACKUP_TESTING}" = 'no' ]] &
 fi
 
 if [[ "${KEYRING_VAULT_MTR}" == 'yes' ]]; then
+    sudo mkdir /run/supervisord
     sudo supervisord
 
     # Required to initialize everything
