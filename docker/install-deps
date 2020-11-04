@@ -234,10 +234,8 @@ unzip /tmp/source_downloads/consul_1.8.5.zip && install consul /usr/local/bin/co
 
 if [[ -f /usr/bin/yum ]]; then
     setcap cap_ipc_lock= /usr/local/bin/vault.0.9.6 && setcap cap_ipc_lock= /usr/local/bin/vault.1.5.4
-    setcap cap_ipc_lock=+ep /usr/local/bin/vault.0.9.6 && setcap cap_ipc_lock=+ep /usr/local/bin/vault.1.5.4
 else
     /sbin/setcap cap_ipc_lock= /usr/local/bin/vault.0.9.6 && setcap cap_ipc_lock= /usr/local/bin/vault.1.5.4
-    /sbin/setcap cap_ipc_lock=+ep /usr/local/bin/vault.0.9.6 && setcap cap_ipc_lock=+ep /usr/local/bin/vault.1.5.4
 fi
 
 # Vault
