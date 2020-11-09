@@ -236,7 +236,7 @@ if [[ "${KEYRING_VAULT_MTR}" == 'yes' ]]; then
 
     echo "Running tests with Hashicorp Vault in Production mode"
     MTR_VAULT_ADDRESS=${VAULT_V1_PROD_ADDRESS} \
-    MTR_VAULT_TOKEN=${VAULT_V1_PROD_MTR_TOKEN} \
+    MTR_VAULT_TOKEN=${VAULT_V1_PROD_TOKEN} \
     MTR_BUILD_THREAD=auto ./mtr \
         --force \
         --max-test-fail=0 \
@@ -246,7 +246,7 @@ if [[ "${KEYRING_VAULT_MTR}" == 'yes' ]]; then
     process_mtr_output "Percona Server - Keyring Vault PROD V1" "${WORKDIR_ABS}/keyring_vault_prod_v1.output.output" "${WORKDIR_ABS}/keyring_vault_prod_v1.output.xml"
 
     MTR_VAULT_ADDRESS=${VAULT_V2_PROD_ADDRESS} \
-    MTR_VAULT_TOKEN=${VAULT_V2_PROD_MTR_TOKEN} \
+    MTR_VAULT_TOKEN=${VAULT_V2_PROD_TOKEN} \
     MTR_BUILD_THREAD=auto ./mtr \
         --force \
         --max-test-fail=0 \
