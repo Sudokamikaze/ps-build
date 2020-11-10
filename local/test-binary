@@ -215,9 +215,11 @@ if [[ "${KEYRING_VAULT_MTR}" == 'yes' ]]; then
     echo "Running tests with Hashicorp Vault in Dev mode"
     MTR_VAULT_ADDRESS=${VAULT_V1_DEV_ADDRESS} \
     MTR_VAULT_TOKEN=${VAULT_V1_DEV_TOKEN} \
+    MTR_VAULT_VERSION=1 \
     MTR_BUILD_THREAD=auto ./mtr \
         --force \
         --max-test-fail=0 \
+        --parallel=$(nproc) \
         --retry=0 \
         --suite=keyring_vault \
         | tee ${WORKDIR_ABS}/keyring_vault_dev_v1.output || true
@@ -225,9 +227,11 @@ if [[ "${KEYRING_VAULT_MTR}" == 'yes' ]]; then
 
     MTR_VAULT_ADDRESS=${VAULT_V2_DEV_ADDRESS} \
     MTR_VAULT_TOKEN=${VAULT_V2_DEV_TOKEN} \
+    MTR_VAULT_VERSION=2 \
     MTR_BUILD_THREAD=auto ./mtr \
         --force \
         --max-test-fail=0 \
+        --parallel=$(nproc) \
         --retry=0 \
         --suite=keyring_vault \
         | tee ${WORKDIR_ABS}/keyring_vault_dev_v2.output || true
@@ -237,9 +241,11 @@ if [[ "${KEYRING_VAULT_MTR}" == 'yes' ]]; then
     echo "Running tests with Hashicorp Vault in Production mode"
     MTR_VAULT_ADDRESS=${VAULT_V1_PROD_ADDRESS} \
     MTR_VAULT_TOKEN=${VAULT_V1_PROD_TOKEN} \
+    MTR_VAULT_VERSION=1 \
     MTR_BUILD_THREAD=auto ./mtr \
         --force \
         --max-test-fail=0 \
+        --parallel=$(nproc) \
         --retry=0 \
         --suite=keyring_vault \
         | tee ${WORKDIR_ABS}/keyring_vault_prod_v1.output || true
@@ -247,9 +253,11 @@ if [[ "${KEYRING_VAULT_MTR}" == 'yes' ]]; then
 
     MTR_VAULT_ADDRESS=${VAULT_V2_PROD_ADDRESS} \
     MTR_VAULT_TOKEN=${VAULT_V2_PROD_TOKEN} \
+    MTR_VAULT_VERSION=2 \
     MTR_BUILD_THREAD=auto ./mtr \
         --force \
         --max-test-fail=0 \
+        --parallel=$(nproc) \
         --retry=0 \
         --suite=keyring_vault \
         | tee ${WORKDIR_ABS}/keyring_vault_prod_v2.output || true
