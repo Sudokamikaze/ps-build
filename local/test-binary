@@ -194,14 +194,15 @@ if [[ ${RHVER} != 6 ]] && [[ "${KEYRING_VAULT_MTR}" == 'yes' ]]; then
     sudo sed -i "s@devtoken1@${VAULT_V1_DEV_TOKEN}@g; s@devtoken2@${VAULT_V2_DEV_TOKEN}@g" $supervisorconfigpath
 
     # Prepare CAs and certs for both vaults
+    echo subjectAltName = IP:127.0.0.1 > /tmp/extfile.cnf
     for VER in v1 v2; do
-        openssl genrsa -out /etc/vault.d-$VER-prod/ca.key 2048
-        openssl req -new -x509 -nodes -days 31 -subj "/CN=VAULT CA" -key /etc/vault.d-$VER-prod/ca.key -out /etc/vault.d-$VER-prod/ca.pem
-        openssl req -newkey rsa:2048 -subj "/CN=VAULT CERT" -nodes -keyout /etc/vault.d-$VER-prod/privkey.pem -out /etc/vault.d-$VER-prod/server-req.pem
-        openssl rsa -in /etc/vault.d-$VER-prod/privkey.pem -out /etc/vault.d-$VER-prod/privkey.pem
-        openssl x509 -req -in /etc/vault.d-$VER-prod/server-req.pem -days 31 -CA /etc/vault.d-$VER-prod/ca.pem -CAkey /etc/vault.d-$VER-prod/ca.key -set_serial 01 -out /etc/vault.d-$VER-prod/fullchain.pem
-        chown -R vault-$VER-prod:vault-$VER-prod /etc/vault.d-$VER-prod
-        install --owner=mysql /etc/vault.d-$VER-prod/ca.pem ${WORKDIR_ABS}/PS/mysql-test/vault-$VER-ca.pem
+        sudo openssl genrsa -out /etc/vault.d-$VER-prod/ca.key 2048
+        sudo openssl req -new -x509 -nodes -days 31 -subj "/CN=VAULT CA" -key /etc/vault.d-$VER-prod/ca.key -out /etc/vault.d-$VER-prod/ca.pem
+        sudo openssl req -newkey rsa:2048 -subj "/CN=VAULT CERT" -nodes -keyout /etc/vault.d-$VER-prod/privkey.pem -out /etc/vault.d-$VER-prod/server-req.pem
+        sudo openssl rsa -in /etc/vault.d-$VER-prod/privkey.pem -out /etc/vault.d-$VER-prod/privkey.pem
+        sudo openssl x509 -req -in /etc/vault.d-$VER-prod/server-req.pem -days 31 -CA /etc/vault.d-$VER-prod/ca.pem -CAkey /etc/vault.d-$VER-prod/ca.key -set_serial 01 -out /etc/vault.d-$VER-prod/fullchain.pem -extfile /tmp/extfile.cnf
+        sudo chown -R vault-$VER-prod:vault-$VER-prod /etc/vault.d-$VER-prod
+        sudo install --owner=mysql /etc/vault.d-$VER-prod/ca.pem ${WORKDIR_ABS}/PS/mysql-test/vault-$VER-ca.pem
     done
 
     sudo supervisord
@@ -215,8 +216,8 @@ if [[ ${RHVER} != 6 ]] && [[ "${KEYRING_VAULT_MTR}" == 'yes' ]]; then
         exit 1
     fi
 
-    VAULT_V1_PROD_KEYS="$(/usr/local/bin/vault.v1 operator init -address='http://127.0.0.1:9300')"
-    VAULT_V2_PROD_KEYS="$(/usr/local/bin/vault.v2 operator init -address='http://127.0.0.1:9500')"
+    VAULT_V1_PROD_KEYS="$(/usr/local/bin/vault.v1 operator init -address='https://127.0.0.1:9300' -ca-cert=${WORKDIR_ABS}/PS/mysql-test/vault-v1-ca.pem)"
+    VAULT_V2_PROD_KEYS="$(/usr/local/bin/vault.v2 operator init -address='https://127.0.0.1:9500' -ca-cert=${WORKDIR_ABS}/PS/mysql-test/vault-v2-ca.pem)"
 
     VAULT_V1_PROD_UNSEAL_KEYS=$(echo "$VAULT_V1_PROD_KEYS" | grep 'Unseal Key' | awk -F ':' '{print $2}')
     VAULT_V2_PROD_UNSEAL_KEYS=$(echo "$VAULT_V2_PROD_KEYS" | grep 'Unseal Key' | awk -F ':' '{print $2}')
@@ -224,12 +225,12 @@ if [[ ${RHVER} != 6 ]] && [[ "${KEYRING_VAULT_MTR}" == 'yes' ]]; then
     VAULT_V2_PROD_TOKEN=$(echo "$VAULT_V2_PROD_KEYS" | grep 'Initial Root Token' | awk -F ':' '{print $2}' | xargs)
 
     for key in $VAULT_V1_PROD_UNSEAL_KEYS; do
-        /usr/local/bin/vault.v1 operator unseal -address='http://127.0.0.1:9300' $key
+        /usr/local/bin/vault.v1 operator unseal -address='https://127.0.0.1:9300' -ca-cert=${WORKDIR_ABS}/PS/mysql-test/vault-v1-ca.pem $key
         sleep 1
     done
     
     for key in $VAULT_V2_PROD_UNSEAL_KEYS; do
-        /usr/local/bin/vault.v2 operator unseal -address='http://127.0.0.1:9500' $key
+        /usr/local/bin/vault.v2 operator unseal -address='https://127.0.0.1:9500' -ca-cert=${WORKDIR_ABS}/PS/mysql-test/vault-v2-ca.pem $key
         sleep 1
     done
 
