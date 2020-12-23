@@ -6,3 +6,7 @@ echo "id from script"
 id
 touch /tmp/mtr_disk_dir/test
 echo "AWO" > /tmp/mtr_disk_dir/test
+cat /tmp/mtr_disk_dir/test
+echo "Testing CI"
+touch /tmp/mtr_disk_dir/TEST
+ls -la /tmp/mtr_disk_dir/
