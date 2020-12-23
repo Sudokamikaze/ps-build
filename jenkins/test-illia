@@ -45,9 +45,6 @@ pipeline {
                     sudo git -C sources reset --hard || :
                     sudo git -C sources clean -xdf   || :
 
-                    cd docker && rm test-illia 
-                    wget https://raw.githubusercontent.com/Sudokamikaze/ps-build/8.0-PS-7267-concept/docker/test-illia && chmod +x test-illia
-                    cd ../
                     echo Test: \$(date -u "+%s")
                     sudo yum install -y dosfstools
                     sg docker -c "
