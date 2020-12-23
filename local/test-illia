@@ -1,0 +1,8 @@
+#!/bin/bash
+set -o errexit
+set -o xtrace
+
+echo "id from script"
+id
+touch /tmp/mtr_disk_dir/test
+echo "AWO" > /tmp/mtr_disk_dir/test

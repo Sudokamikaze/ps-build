@@ -1,0 +1,19 @@
+#!/bin/bash
+set -o errexit
+set -o xtrace
+
+SOURCE_IMAGE=${1:-centos:7}
+
+docker run --rm \
+    --security-opt seccomp=unconfined \
+    --mount type=bind,source=${ROOT_DIR},destination=/tmp/ps \
+    --mount type=bind,source=${SCRIPTS_DIR},destination=/tmp/scripts \
+    --mount type=bind,source=/mnt/mtr_disk_dir,destination=/tmp/mtr_disk_dir \
+    illiapshonkin/ps-build-7267:${SOURCE_IMAGE//[:\/]/-} \
+    sh -c "
+    set -o errexit
+    set -o xtrace
+
+    id
+    bash -x /tmp/scripts/test-illia
+"

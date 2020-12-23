@@ -1,0 +1,70 @@
+pipeline_timeout = 10
+
+pipeline {
+    parameters {
+        choice(
+            choices: 'centos:6\ncentos:7\ncentos:8\nubuntu:xenial\nubuntu:bionic\nubuntu:focal\ndebian:stretch\ndebian:buster',
+            description: 'OS version for compilation',
+            name: 'DOCKER_OS')
+        choice(
+            choices: 'docker-32gb\ndocker',
+            description: 'Run build on specified instance type',
+            name: 'LABEL')
+    }
+    agent {
+        label 'micro-amazon'
+    }
+    options {
+        skipDefaultCheckout()
+        skipStagesAfterUnstable()
+        timeout(time: 6, unit: 'DAYS')
+        buildDiscarder(logRotator(numToKeepStr: '200', artifactNumToKeepStr: '200'))
+    }
+    stages {
+        stage('Prepare case-insensitive fs') {
+            agent { label LABEL }
+            steps {
+                sh '''
+                    if [[ ! -f /mnt/mtr_disk_\$CMAKE_BUILD_TYPE.img ]] && [[ -z \$(mount | grep /mnt/mtr_disk_dir_\$CMAKE_BUILD_TYPE) ]]; then
+                        sudo dd if=/dev/zero of=/mnt/mtr_disk_\$CMAKE_BUILD_TYPE.img bs=1G count=10
+                        sudo /sbin/mkfs.vfat /mnt/mtr_disk_\$CMAKE_BUILD_TYPE.img
+                        sudo mkdir -p /mnt/mtr_disk_dir_\$CMAKE_BUILD_TYPE
+                        sudo mount -o loop -o uid=27 -o gid=993 /mnt/mtr_disk_\$CMAKE_BUILD_TYPE.img /mnt/mtr_disk_dir_\$CMAKE_BUILD_TYPE
+                    fi
+                '''
+            }
+        }
+        stage('Run script to test docker bind') {
+            agent { label LABEL }
+            steps {
+                git branch: '8.0-PS-7267-concept', url: 'https://github.com/Sudokamikaze/ps-build'
+                sh '''
+                    sudo git reset --hard
+                    sudo git clean -xdf
+                    rm -rf sources/results
+                    sudo git -C sources reset --hard || :
+                    sudo git -C sources clean -xdf   || :
+
+                    echo Test: \$(date -u "+%s")
+                    sudo yum install -y dosfstools
+                    sg docker -c "
+                        if [ \$(docker ps -q | wc -l) -ne 0 ]; then
+                            docker ps -q | xargs docker stop --time 1 || :
+                        fi
+                        ulimit -a
+                        ./docker/test-illia ${DOCKER_OS}
+                    "
+
+                    echo Archive test: \$(date -u "+%s")
+                '''
+            }
+        }
+    }
+    post {
+        always {
+            sh '''
+                echo Finish: \$(date -u "+%s")
+            '''
+        }
+    }
+}
