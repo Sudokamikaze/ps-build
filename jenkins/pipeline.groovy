@@ -113,8 +113,7 @@ pipeline {
         choice(
             choices: 'yes\nno',
             description: 'Run case-insensetive MTR tests',
-            name: 'CI_FS_MTR'
-        )
+            name: 'CI_FS_MTR')
         string(
             defaultValue: '--unit-tests-report',
             description: 'mysql-test-run.pl options, for options like: --big-test --only-big-test --nounit-tests --unit-tests-report',
