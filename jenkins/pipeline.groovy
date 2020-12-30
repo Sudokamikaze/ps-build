@@ -227,7 +227,7 @@ pipeline {
             options { retry(3) }
             agent { label LABEL }
             steps {
-                git branch: '5.7', url: 'https://github.com/Percona-Lab/ps-build'
+                git branch: 'PS-7483-testingground', url: 'https://github.com/Sudokamikaze/ps-build'
                 withCredentials([
                     string(credentialsId: 'MTR_VAULT_TOKEN', variable: 'MTR_VAULT_TOKEN'),
                     string(credentialsId: 'VAULT_V1_DEV_TOKEN', variable: 'VAULT_V1_DEV_TOKEN'),

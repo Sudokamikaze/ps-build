@@ -1,5 +1,5 @@
 - job:
-    name: percona-server-5.7-param
+    name: percona-server-5.7-param-ci
     project-type: matrix
     defaults: global
     description: |
@@ -174,10 +174,8 @@
          type: user-defined
          name: DOCKER_OS
          values:
-          - centos:6
           - centos:7
           - centos:8
-          - i386/centos:6
           - ubuntu:xenial
           - ubuntu:bionic
           - ubuntu:focal
@@ -185,7 +183,7 @@
           - debian:buster
     builders:
     - trigger-builds:
-      - project: percona-server-5.7-pipeline
+      - project: percona-server-5.7-pipeline-ci
         current-parameters: true
         predefined-parameters: |
           DOCKER_OS=${DOCKER_OS}
@@ -198,12 +196,12 @@
     - shell: |
         sudo find . -name "*.xml" -o -name "*.log" -delete
     - copyartifact:
-        project: percona-server-5.7-pipeline
+        project: percona-server-5.7-pipeline-ci
         which-build: specific-build
-        build-number: "${TRIGGERED_BUILD_NUMBERS_percona_server_5_7_pipeline}"
+        build-number: "${TRIGGERED_BUILD_NUMBERS_percona_server_5_7_pipeline_ci}"
         do-not-fingerprint: true
     - shell: |
-        echo "${TRIGGERED_BUILD_NUMBERS_percona_server_5_7_pipeline}" > PIPELINE_BUILD_NUMBER
+        echo "${TRIGGERED_BUILD_NUMBERS_percona_server_5_7_pipeline_ci}" > PIPELINE_BUILD_NUMBER
         gunzip build.log.gz
     publishers:
     - warnings:
