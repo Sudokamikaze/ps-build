@@ -1,5 +1,5 @@
 - job:
-    name: percona-server-5.7-pipeline
+    name: percona-server-5.7-pipeline-ps-7382
     project-type: pipeline
     description: |
         Do not edit this job through the web!
@@ -7,9 +7,9 @@
     pipeline-scm:
       scm:
         - git:
-            url: https://github.com/Percona-Lab/ps-build
+            url: https://github.com/Sudokamikaze/ps-build
             branches:
-            - "5.7"
+            - "5.7-PS-7382-tokens-testingground"
             wipe-workspace: false
       lightweight-checkout: true
       script-path: jenkins/pipeline.groovy
