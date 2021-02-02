@@ -79,7 +79,7 @@ if [[ ${WITH_BORINGSSL} == "true" ]]; then
     else
         BORING_SSL_CMAKE=/usr/bin/cmake
     fi
-    export $GOCACHE="/tmp/boring_ssl_cache"
+    export GOCACHE="/tmp/boring_ssl_cache"
     ${BORING_SSL_CMAKE} .. -DCMAKE_CXX_FLAGS="-fPIC" -DCMAKE_C_FLAGS="-fPIC"
     if make -j$(nproc); then
         mkdir -p ${WORKDIR}/boringssl_bin/lib
