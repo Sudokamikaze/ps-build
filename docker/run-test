@@ -32,8 +32,6 @@ docker run --rm \
     export MTR_VAULT_TOKEN='${MTR_VAULT_TOKEN}'
     export CI_FS_MTR='${CI_FS_MTR}'
 
-    yum install -y libatomic
-
     mkdir /tmp/results /tmp/ps_mtr_tempdir
     cp /tmp/ps/results/*.tar.gz /tmp/results
 
