@@ -1,5 +1,5 @@
 - job:
-    name: percona-server-5.7-param
+    name: percona-server-5.7-param-ps-7382
     project-type: matrix
     defaults: global
     description: |
@@ -73,6 +73,10 @@
         - "ON"
         - "OFF"
         description: Compile RocksDB engine
+    - choice:
+        name: WITH_KEYRING_VAULT_TEST
+        choices:
+         
     - choice:
         name: WITH_EMBEDDED_SERVER
         choices:
@@ -193,7 +197,7 @@
           - debian:buster
     builders:
     - trigger-builds:
-      - project: percona-server-5.7-pipeline
+      - project: percona-server-5.7-pipeline-ps-7382
         current-parameters: true
         predefined-parameters: |
           DOCKER_OS=${DOCKER_OS}
@@ -206,12 +210,12 @@
     - shell: |
         sudo find . -name "*.xml" -o -name "*.log" -delete
     - copyartifact:
-        project: percona-server-5.7-pipeline
+        project: percona-server-5.7-pipeline-ps-7382
         which-build: specific-build
-        build-number: "${TRIGGERED_BUILD_NUMBERS_percona_server_5_7_pipeline}"
+        build-number: "${TRIGGERED_BUILD_NUMBERS_percona_server_5_7_pipeline_ps_7382}"
         do-not-fingerprint: true
     - shell: |
-        echo "${TRIGGERED_BUILD_NUMBERS_percona_server_5_7_pipeline}" > PIPELINE_BUILD_NUMBER
+        echo "${TRIGGERED_BUILD_NUMBERS_percona_server_5_7_pipeline_ps_7382}" > PIPELINE_BUILD_NUMBER
         gunzip build.log.gz
     publishers:
     - warnings:
