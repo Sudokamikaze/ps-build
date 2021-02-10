@@ -81,14 +81,6 @@ cat <<-EOF | tee /tmp/vault.d-${ALIAS}-prod/policies/mtr.hcl
 path "mtr/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
 }
-
-path "sys/mounts" {
-    capabilities = ["read", "list"]
-}
-
-path "sys/mounts/*" {
-    capabilities = ["read", "list"]
-}
 EOF
     return
 }
@@ -98,14 +90,6 @@ function prepare_dev_env {
 cat <<-EOF | tee /tmp/vault.d-${ALIAS}-dev/policies/mtr.hcl
 path "mtr/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
-}
-
-path "sys/mounts" {
-    capabilities = ["read", "list"]
-}
-
-path "sys/mounts/*" {
-    capabilities = ["read", "list"]
 }
 EOF
 }
@@ -131,8 +115,7 @@ function main {
         done
 
         docker exec -e VAULT_TOKEN=${VAULT_PROD_TOKEN} -e VAULT_ADDR="https://vault-prod-${ALIAS}:${PORT}" -e VAULT_CACERT="/etc/vault.d/ssl/ca.pem" -t vault-prod-${ALIAS} vault policy write mtr /etc/vault.d/policies/mtr.hcl
-        MTR_TOKEN_TMP=$(docker exec -e VAULT_TOKEN=${VAULT_PROD_TOKEN} -e VAULT_ADDR="https://vault-prod-${ALIAS}:${PORT}" -e VAULT_CACERT="/etc/vault.d/ssl/ca.pem" -t vault-prod-${ALIAS} vault token create -no-default-policy -format=json -policy=mtr)
-        VAULT_MTR_TOKEN=$(echo $MTR_TOKEN_TMP | jq -r '.auth.client_token')
+        VAULT_MTR_TOKEN=$(docker exec -e VAULT_TOKEN=${VAULT_PROD_TOKEN} -e VAULT_ADDR="https://vault-prod-${ALIAS}:${PORT}" -e VAULT_CACERT="/etc/vault.d/ssl/ca.pem" -t vault-prod-${ALIAS} vault token create -no-default-policy -policy=mtr -field=token)
         echo "Production token: ${VAULT_PROD_TOKEN}"
         echo "MTR token: ${VAULT_MTR_TOKEN}"
     else
@@ -140,8 +123,7 @@ function main {
         docker run --cap-add=IPC_LOCK -d --name=vault-dev-${ALIAS} --hostname=vault-dev-${ALIAS} --net bridge-vault -v /tmp/vault.d-${ALIAS}-dev:/etc/vault.d vault:${VERSION} server -dev -dev-listen-address=vault-dev-${ALIAS}:${PORT} -dev-root-token-id=${DEVTOKEN}
         sleep 3
         docker exec -e VAULT_TOKEN=${DEVTOKEN} -e VAULT_ADDR="http://vault-dev-${ALIAS}:${PORT}" -t vault-dev-${ALIAS} vault policy write mtr /etc/vault.d/policies/mtr.hcl
-        MTR_TOKEN_TMP=$(docker exec -e VAULT_TOKEN=${DEVTOKEN} -e VAULT_ADDR="http://vault-dev-${ALIAS}:${PORT}" -t vault-dev-${ALIAS} vault token create -no-default-policy -format=json -policy=mtr)
-        VAULT_MTR_TOKEN=$(echo $MTR_TOKEN_TMP | jq -r '.auth.client_token')
+        VAULT_MTR_TOKEN=$(docker exec -e VAULT_TOKEN=${DEVTOKEN} -e VAULT_ADDR="http://vault-dev-${ALIAS}:${PORT}" -t vault-dev-${ALIAS} vault token create -no-default-policy -policy=mtr -field=token)
         echo "MTR token: ${VAULT_MTR_TOKEN}"
     fi
 }
