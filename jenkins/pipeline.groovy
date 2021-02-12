@@ -141,7 +141,7 @@ pipeline {
                     fi
                     rm -f ${WORKSPACE}/VERSION-${BUILD_NUMBER}
                 '''
-                git branch: '5.6', url: 'https://github.com/Percona-Lab/ps-build'
+                git branch: '5.6-PS-7565-testingground', url: 'https://github.com/Sudokamikaze/ps-build'
                 sh '''
                     git reset --hard
                     git clean -xdf
@@ -197,7 +197,7 @@ pipeline {
             options { retry(3) }
             agent { label LABEL }
             steps {
-                git branch: '5.6', url: 'https://github.com/Percona-Lab/ps-build'
+                git branch: '5.6-PS-7565-testingground', url: 'https://github.com/Sudokamikaze/ps-build'
                 sh '''
                     git reset --hard
                     git clean -xdf
