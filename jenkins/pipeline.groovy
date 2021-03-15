@@ -233,7 +233,7 @@ pipeline {
             steps {
                 timeout(time: pipeline_timeout, unit: 'HOURS')  {
                     retry(3) {
-                        git branch: '8.0', url: 'https://github.com/Percona-Lab/ps-build'
+                        git branch: '8.0-PS-7602-testingground', url: 'https://github.com/Sudokamikaze/ps-build'
                         withCredentials([string(credentialsId: 'MTR_VAULT_TOKEN', variable: 'MTR_VAULT_TOKEN')]) {
                             withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'c8b933cd-b8ca-41d5-b639-33fe763d3f68', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
                                 sh '''
