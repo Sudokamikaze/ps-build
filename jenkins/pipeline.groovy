@@ -231,7 +231,7 @@ pipeline {
             steps {
                 timeout(time: pipeline_timeout, unit: 'HOURS')  {
                     retry(3) {
-                        git branch: '8.0', url: 'https://github.com/Percona-Lab/ps-build'
+                        git branch: '8.0-PS-7381-testingground', url: 'https://github.com/Sudokamikaze/ps-build'
                         withCredentials([string(credentialsId: 'MTR_VAULT_TOKEN', variable: 'MTR_VAULT_TOKEN')]) {
                             sh '''
                                 sudo git reset --hard
