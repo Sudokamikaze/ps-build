@@ -293,7 +293,7 @@ pipeline {
                     " > public_url
                 '''
                 step([$class: 'JUnitResultArchiver', testResults: '*.xml', healthScaleFactor: 1.0])
-                archiveArtifacts 'build.log.gz,*.xml,*.output.gz,public_url'
+                archiveArtifacts 'build.log.gz,*.xml,*.output.gz,*.txt,public_url'
                 }
             }
         }
