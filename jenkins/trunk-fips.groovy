@@ -6,6 +6,9 @@ void build(String CMAKE_BUILD_TYPE) {
             git reset --hard
             git clean -xdf
             rm -rf sources/results
+            git checkout 8.0
+            sudo ./docker/install-deps
+            git checkout -
         '''
         copyArtifacts filter: 'PIPELINE_BUILD_NUMBER', projectName: "${UPSTREAM_JOBNAME}/CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE},DOCKER_OS=centos:7,label=docker", selector: specific(UPSTREAM_NUMBER)
         sh """
@@ -13,7 +16,6 @@ void build(String CMAKE_BUILD_TYPE) {
             until aws s3 cp --no-progress s3://ps-build-cache/jenkins-percona-server-${PS_BRANCH}-pipeline-\${PIPELINE_BUILD_NUMBER}/binary.tar.gz ./sources/results/binary.tar.gz; do
                 sleep 5
             done
-            sudo ./docker/install-deps
 
             echo Test: \$(date -u "+%s")
             ulimit -a; env
