@@ -1,5 +1,5 @@
 - job:
-    name: percona-server-8.0-param
+    name: percona-server-8.0-param-ENG-741
     project-type: matrix
     defaults: global
     description: |
@@ -156,7 +156,7 @@
           - debian:buster
     builders:
     - trigger-builds:
-      - project: percona-server-8.0-pipeline
+      - project: percona-server-8.0-pipeline-ENG-741
         current-parameters: true
         predefined-parameters: |
           DOCKER_OS=${DOCKER_OS}
@@ -169,12 +169,12 @@
     - shell: |
         sudo find . -name "*.xml" -o -name "*.log" -delete
     - copyartifact:
-        project: percona-server-8.0-pipeline
+        project: percona-server-8.0-pipeline-ENG-741
         which-build: specific-build
-        build-number: "${TRIGGERED_BUILD_NUMBERS_percona_server_8_0_pipeline}"
+        build-number: "${TRIGGERED_BUILD_NUMBERS_percona_server_8_0_pipeline_ENG_741}"
         do-not-fingerprint: true
     - shell: |
-        echo "${TRIGGERED_BUILD_NUMBERS_percona_server_8_0_pipeline}" > PIPELINE_BUILD_NUMBER
+        echo "${TRIGGERED_BUILD_NUMBERS_percona_server_8_0_pipeline_ENG_741}" > PIPELINE_BUILD_NUMBER
         find . -name "*.txt" -exec echo {} \;
         gunzip build.log.gz
     publishers:
@@ -206,3 +206,5 @@
         keep-long-stdio: true
     - archive:
         artifacts: 'PIPELINE_BUILD_NUMBER'
+    - archive:
+        artifacts: '**/*.txt'

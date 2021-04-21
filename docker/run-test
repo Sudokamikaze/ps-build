@@ -38,5 +38,5 @@ docker run --rm \
     bash -x /tmp/scripts/test-binary /tmp/results
 
     sudo mv /tmp/results/*.xml /tmp/results/*.output /tmp/results/*.txt /tmp/ps/results/
-    sudo chown $(id -u):$(id -g) /tmp/ps/results/*.xml /tmp/ps/results/*.output /tmp/results/*.txt
+    sudo chown $(id -u):$(id -g) /tmp/ps/results/*.xml /tmp/ps/results/*.output /tmp/ps/results/*.txt
 "
