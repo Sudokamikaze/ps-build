@@ -239,7 +239,7 @@ pipeline {
             options { retry(3) }
             agent { label LABEL }
             steps {
-                git branch: '5.7', url: 'https://github.com/Percona-Lab/ps-build'
+                git branch: 'PS-7569', url: 'https://github.com/Sudokamikaze/ps-build'
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '10ee734d-bbd1-4b4b-a611-5a2765ef9d47', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
                     withCredentials([
                         string(credentialsId: 'MTR_VAULT_TOKEN', variable: 'MTR_VAULT_TOKEN'),
