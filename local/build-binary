@@ -157,7 +157,7 @@ else
     WITH_MECAB="system"
 fi
 
-if [[ "${WITH_KEYRING_VAULT}" == "ON" ]] && [[ "${OS_VERSION}" != *"CentOS release 6."* ]]; then
+if [[ "${WITH_KEYRING_VAULT}" == "ON" ]] && [[ "$(lsb_release -d -s)" != *"CentOS release 6."* ]]; then
     CMAKE_OPTS+=" -DWITH_KEYRING_VAULT=ON -DWITH_KEYRING_VAULT_TEST=ON"
 else
     CMAKE_OPTS+=" -DWITH_KEYRING_VAULT=OFF -DWITH_KEYRING_VAULT_TEST=OFF"
