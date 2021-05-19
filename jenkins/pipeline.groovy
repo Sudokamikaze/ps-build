@@ -185,7 +185,7 @@ pipeline {
                                 fi
                                 rm -f ${WORKSPACE}/VERSION-${BUILD_NUMBER}
                             '''
-                            git branch: '8.0', url: 'https://github.com/Percona-Lab/ps-build'
+                            git branch: '8.0-PS-7717-testingground', url: 'https://github.com/Sudokamikaze/ps-build'
                             sh '''
                                 # sudo is needed for better node recovery after compilation failure
                                 # if building failed on compilation stage directory will have files owned by docker user
