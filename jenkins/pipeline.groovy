@@ -185,7 +185,7 @@ pipeline {
                         fi
                         rm -f ${WORKSPACE}/VERSION-${BUILD_NUMBER}
                     '''
-                    git branch: '5.7', url: 'https://github.com/Percona-Lab/ps-build'
+                    git branch: '5.7-PS-7717-testingground', url: 'https://github.com/Sudokamikaze/ps-build'
                     sh '''
                         git reset --hard
                         git clean -xdf
