@@ -18,6 +18,8 @@ if (
         pipeline_timeout = 20
       }
 
+if (params.DOCKER_OS == 'ubuntu:hirsute') { LABEL = 'docker32-gb-hirsute-zenfs' }
+
 pipeline {
     parameters {
         string(
@@ -51,7 +53,7 @@ pipeline {
             name: 'TOKUBACKUP_BRANCH',
             trim: true)
         choice(
-            choices: 'centos:6\ncentos:7\ncentos:8\nubuntu:xenial\nubuntu:bionic\nubuntu:focal\ndebian:stretch\ndebian:buster',
+            choices: 'centos:6\ncentos:7\ncentos:8\nubuntu:xenial\nubuntu:bionic\nubuntu:focal\nubuntu:hirsute\ndebian:stretch\ndebian:buster',
             description: 'OS version for compilation',
             name: 'DOCKER_OS')
         choice(
@@ -114,6 +116,10 @@ pipeline {
             defaultValue: '',
             description: 'TokuDB specific mtr args',
             name: 'TOKUDB_ENGINES_MTR_ARGS')
+        choice(
+            choices: 'yes\nno',
+            description: 'Run ZenFS MTR tests',
+            name: 'ZEN_FS_MTR')
         choice(
             choices: 'yes\nno',
             description: 'Run case-insensetive MTR tests',
@@ -276,6 +282,38 @@ pipeline {
                                             sudo mkdir -p /mnt/ci_disk_dir_\$CMAKE_BUILD_TYPE
                                             sudo mount -o loop -o uid=27 -o gid=27 -o check=r /mnt/ci_disk_\$CMAKE_BUILD_TYPE.img /mnt/ci_disk_dir_\$CMAKE_BUILD_TYPE
                                         fi                                
+                                    fi
+
+                                    if [[ \$ZEN_FS_MTR == 'yes' ]] && [[ \$DOCKER_OS == "ubuntu:hirsute" ]]; then
+                                        echo "Building ZenFS utils..."
+                                        aws ecr-public get-login-password --region us-east-1 | docker login -u AWS --password-stdin public.ecr.aws/e7j3v3n0
+                                        docker run --rm \
+                                            --mount type=bind,source=local,destination=/tmp/scripts \
+                                            public.ecr.aws/e7j3v3n0/ps-build:ubuntu-hirsute \
+                                            sh -c "
+                                            cd /tmp/scripts && bash /tmp/scripts/bootstrap-zenfs
+                                        "
+
+                                        sudo install --owner=root --group=root --mode=+rx local/zenfs /usr/bin/
+                                        sudo install --owner=root --group=root --mode=+rx local/nullblk-zoned /usr/bin/
+                                        
+                                        AUX_PATH=/mnt/zenfs_disk_dir_${CMAKE_BUILD_TYPE}
+
+                                        sudo bash -c 'echo 0 > /sys/kernel/config/nullb/nullb0/power'
+                                        sudo rmdir /sys/kernel/config/nullb/nullb0
+                                        sudo rm -rf /tmp/zenfs* $AUX_PATH
+
+                                        sudo nullblk-zoned 512 128 124 0 32 12 12
+                                        sudo chown 27:27 /dev/nullb0
+                                        sudo chmod 600 /dev/nullb0
+
+                                        sudo zenfs mkfs --zbd nullb0 --aux_path $AUX_PATH
+                                        sudo zenfs ls-uuid
+                                        sudo zenfs df --zbd nullb0
+                                        sudo zenfs list --zbd nullb0
+
+                                        sudo blkzone report /dev/nullb0
+                                        sudo zbd report /dev/nullb0
                                     fi
 
                                     echo Test: \$(date -u "+%s")

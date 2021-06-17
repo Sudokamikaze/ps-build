@@ -11,6 +11,10 @@ if [[ ${CI_FS_MTR} == 'yes' ]]; then
     CI_FS_DOCKER_FLAG="--mount type=bind,source=/mnt/ci_disk_dir_${CMAKE_BUILD_TYPE},destination=/tmp/ci_disk_dir"
 fi
 
+if [[ ${ZEN_FS_MTR} == "yes" ]] && [[ ${DOCKER_OS} == "ubuntu:hirsute" ]]; then
+    ZEN_FS_DOCKER_FLAG="--mount type=bind,source=/mnt/zenfs_disk_dir_${CMAKE_BUILD_TYPE},destination=/tmp/zenfs_disk_dir"
+fi
+
 if [[ "${KEYRING_VAULT_MTR}" == 'yes' ]] && [[ ${DOCKER_OS} != 'centos:6' ]] && [[ ${DOCKER_OS} != 'i386/centos:6' ]]; then
     if [[ $(docker network list | grep bridge-vault) != *bridge-vault* ]]; then
         docker network create bridge-vault
@@ -43,6 +47,7 @@ docker run --rm \
     --mount type=bind,source=${SCRIPTS_DIR},destination=/tmp/scripts \
     ${CI_FS_DOCKER_FLAG} \
     ${VAULT_DOCKER_FLAG} \
+    ${ZEN_FS_DOCKER_FLAG} \
     public.ecr.aws/e7j3v3n0/ps-build:${SOURCE_IMAGE//[:\/]/-} \
     sh -c "
     set -o errexit
