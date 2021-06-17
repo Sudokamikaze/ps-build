@@ -18,7 +18,7 @@ if (
         pipeline_timeout = 20
       }
 
-if (params.DOCKER_OS == 'ubuntu:hirsute') { LABEL = 'docker32-gb-hirsute-zenfs' }
+if (params.DOCKER_OS == 'ubuntu:hirsute') { LABEL = 'docker-32gb-hirsute' }
 
 pipeline {
     parameters {
@@ -172,7 +172,7 @@ pipeline {
                         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'c8b933cd-b8ca-41d5-b639-33fe763d3f68', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
                             sh 'echo Prepare: \$(date -u "+%s")'
                             echo 'Checking Percona Server branch version, JEN-913 prevent wrong version run'
-                            sh '''
+                            sh '''#!/bin/bash
                                 MY_BRANCH_BASE_MAJOR=8
                                 MY_BRANCH_BASE_MINOR=0
                                 RAW_VERSION_LINK=$(echo ${GIT_REPO%.git} | sed -e "s:github.com:raw.githubusercontent.com:g")
@@ -191,8 +191,8 @@ pipeline {
                                 fi
                                 rm -f ${WORKSPACE}/VERSION-${BUILD_NUMBER}
                             '''
-                            git branch: '8.0', url: 'https://github.com/Percona-Lab/ps-build'
-                            sh '''
+                            git branch: '8.0-PS-7749-testingground', url: 'https://github.com/Sudokamikaze/ps-build'
+                            sh '''#!/bin/bash
                                 # sudo is needed for better node recovery after compilation failure
                                 # if building failed on compilation stage directory will have files owned by docker user
                                 sudo git reset --hard
@@ -257,12 +257,12 @@ pipeline {
             steps {
                 timeout(time: pipeline_timeout, unit: 'HOURS')  {
                     retry(3) {
-                        git branch: '8.0', url: 'https://github.com/Percona-Lab/ps-build'
+                        git branch: '8.0-PS-7749-testingground', url: 'https://github.com/Sudokamikaze/ps-build'
                         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'c8b933cd-b8ca-41d5-b639-33fe763d3f68', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
                             withCredentials([
                                 string(credentialsId: 'VAULT_V1_DEV_ROOT_TOKEN', variable: 'VAULT_V1_DEV_ROOT_TOKEN'),
                                 string(credentialsId: 'VAULT_V2_DEV_ROOT_TOKEN', variable: 'VAULT_V2_DEV_ROOT_TOKEN')]) {
-                                sh '''
+                                sh '''#!/bin/bash
                                     sudo git reset --hard
                                     sudo git clean -xdf
                                     rm -rf sources/results
@@ -287,11 +287,13 @@ pipeline {
                                     if [[ \$ZEN_FS_MTR == 'yes' ]] && [[ \$DOCKER_OS == "ubuntu:hirsute" ]]; then
                                         echo "Building ZenFS utils..."
                                         aws ecr-public get-login-password --region us-east-1 | docker login -u AWS --password-stdin public.ecr.aws/e7j3v3n0
-                                        docker run --rm \
-                                            --mount type=bind,source=local,destination=/tmp/scripts \
-                                            public.ecr.aws/e7j3v3n0/ps-build:ubuntu-hirsute \
-                                            sh -c "
-                                            cd /tmp/scripts && bash /tmp/scripts/bootstrap-zenfs
+                                        sg docker -c "
+                                            docker run --rm \
+                                                --mount type=bind,source=\$PWD/local,destination=/tmp/scripts \
+                                                illiapshonkin/ps-7749:ubuntu-hirsute \
+                                                sh -c "
+                                                cd /tmp/scripts && sudo bash /tmp/scripts/bootstrap-zenfs
+                                            "
                                         "
 
                                         sudo install --owner=root --group=root --mode=+rx local/zenfs /usr/bin/
@@ -344,7 +346,7 @@ pipeline {
             steps {
                 retry(3) {
                 deleteDir()
-                sh '''
+                sh '''#!/bin/bash
                     aws s3 sync --no-progress --exclude 'binary.tar.gz' s3://ps-build-cache/${BUILD_TAG}/ ./
 
                     echo "

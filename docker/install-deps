@@ -263,7 +263,7 @@ if [ ! -f /usr/local/lib/libeatmydata.so ]; then
 fi
 
 # PS-7159 remove localhost from ipv6 
-sed -re "s/^(::1.*)\slocalhost\b(.*)$/\1 \2/g" /etc/hosts 1<> /etc/hosts
+# sed -re "s/^(::1.*)\slocalhost\b(.*)$/\1 \2/g" /etc/hosts 1<> /etc/hosts
 
 # NB: resulting docker image will be used for building all branches: 5.6, 5.7, 8.0
 # boost 1.59.0 needed for percona-server 5.7
