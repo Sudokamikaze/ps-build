@@ -6,7 +6,7 @@
 set -o errexit
 set -o xtrace
 
-export WORKDIR=$PWD
+export WORKDIR=$1
 
 # ------------------------------------------------------------------------------
 # Clone RocksDB for ZENFS compiling

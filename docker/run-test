@@ -12,21 +12,33 @@ if [[ ${CI_FS_MTR} == 'yes' ]]; then
 fi
 
 if [[ ${ZEN_FS_MTR} == "yes" ]] && [[ ${DOCKER_OS} == "ubuntu:hirsute" ]]; then
-    sudo bash $SCRIPTS_DIR/bootstrap-zenfs
+    docker run --rm \
+        --security-opt seccomp=unconfined \
+        --mount type=bind,source=${SCRIPTS_DIR},destination=/tmp/scripts \
+        illiapshonkin/ps-7749:${SOURCE_IMAGE//[:\/]/-} \
+        sh -c "
+        set -o errexit
+        set -o xtrace
 
+        sudo bash /tmp/scripts/bootstrap-zenfs /tmp/scripts/
+        "
+    
     if [[ -f $SCRIPTS_DIR/zenfs ]]; then
-        sudo install --owner=root --group=root --mode=+rx $SCRIPTS_DIR/local/nullblk-zoned /usr/bin/
+        sudo install --owner=root --group=root --mode=+rx $SCRIPTS_DIR/nullblk-zoned /usr/bin/
         sudo install --owner=root --group=root --mode=+rx $SCRIPTS_DIR/zenfs /usr/bin/
 
-        sudo bash -c 'echo 0 > /sys/kernel/config/nullb/nullb0/power'
-        sudo rmdir /sys/kernel/config/nullb/nullb0
+        unset AUX_PATH
+        AUX_PATH=/mnt/zenfs_disk_dir
+
+        sudo bash -c 'echo 0 > /sys/kernel/config/nullb/nullb0/power' || true
+        sudo rmdir /sys/kernel/config/nullb/nullb0 || true 
+        sudo rm -rf /tmp/zenfs* $AUX_PATH || true
 
         sudo nullblk-zoned 512 128 124 0 32 12 12
         sudo chown 27:27 /dev/nullb0
         sudo chmod 600 /dev/nullb0
 
-        unset AUX_PATH
-        AUX_PATH=/mnt/zenfs_disk_dir
+
 
         sudo zenfs mkfs --zbd nullb0 --aux_path $AUX_PATH
         sudo zenfs ls-uuid
@@ -105,10 +117,11 @@ docker run --rm \
     export VAULT_V1_PROD_MTR_TOKEN='${VAULT_V1_PROD_MTR_TOKEN}'
     export VAULT_V2_PROD_MTR_TOKEN='${VAULT_V2_PROD_MTR_TOKEN}'
     export DOCKER_OS='${DOCKER_OS//:/-}'
+    export ZEN_FS_MTR='${ZEN_FS_MTR}'
 
     mv /tmp/ps/*.pem /tmp/results || true
     cp /tmp/ps/results/*.tar.gz /tmp/results
-    sudo install --owner=root --group=root --mode=+rx $SCRIPTS_DIR/zenfs /usr/bin/
+    sudo install --owner=root --group=root --mode=+rx  /tmp/scripts/zenfs /usr/bin/
 
     bash -x /tmp/scripts/test-binary /tmp/results
 

@@ -272,8 +272,12 @@ pipeline {
                                     until aws s3 cp --no-progress s3://ps-build-cache/${BUILD_TAG}/binary.tar.gz ./sources/results/binary.tar.gz; do
                                         sleep 5
                                     done
-
-                                    sudo yum -y install jq
+                                    
+                                    if [ -f /usr/bin/yum ]; then
+                                        sudo yum -y install jq gflags-devel
+                                    else
+                                        sudo apt-get install -y jq libgflags-dev libjemalloc-dev
+                                    fi
 
                                     if [[ \$CI_FS_MTR == 'yes' ]]; then
                                         if [[ ! -f /mnt/ci_disk_\$CMAKE_BUILD_TYPE.img ]] && [[ -z \$(mount | grep /mnt/ci_disk_dir_\$CMAKE_BUILD_TYPE) ]]; then
