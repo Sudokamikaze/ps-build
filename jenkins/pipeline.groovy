@@ -284,40 +284,6 @@ pipeline {
                                         fi                                
                                     fi
 
-                                    if [[ \$ZEN_FS_MTR == 'yes' ]] && [[ \$DOCKER_OS == "ubuntu:hirsute" ]]; then
-                                        echo "Building ZenFS utils..."
-                                        aws ecr-public get-login-password --region us-east-1 | docker login -u AWS --password-stdin public.ecr.aws/e7j3v3n0
-                                        sg docker -c "
-                                            docker run --rm \
-                                                --mount type=bind,source=\$PWD/local,destination=/tmp/scripts \
-                                                illiapshonkin/ps-7749:ubuntu-hirsute \
-                                                sh -c "
-                                                cd /tmp/scripts && sudo bash /tmp/scripts/bootstrap-zenfs
-                                            "
-                                        "
-
-                                        sudo install --owner=root --group=root --mode=+rx local/zenfs /usr/bin/
-                                        sudo install --owner=root --group=root --mode=+rx local/nullblk-zoned /usr/bin/
-                                        
-                                        AUX_PATH=/mnt/zenfs_disk_dir_${CMAKE_BUILD_TYPE}
-
-                                        sudo bash -c 'echo 0 > /sys/kernel/config/nullb/nullb0/power'
-                                        sudo rmdir /sys/kernel/config/nullb/nullb0
-                                        sudo rm -rf /tmp/zenfs* $AUX_PATH
-
-                                        sudo nullblk-zoned 512 128 124 0 32 12 12
-                                        sudo chown 27:27 /dev/nullb0
-                                        sudo chmod 600 /dev/nullb0
-
-                                        sudo zenfs mkfs --zbd nullb0 --aux_path $AUX_PATH
-                                        sudo zenfs ls-uuid
-                                        sudo zenfs df --zbd nullb0
-                                        sudo zenfs list --zbd nullb0
-
-                                        sudo blkzone report /dev/nullb0
-                                        sudo zbd report /dev/nullb0
-                                    fi
-
                                     echo Test: \$(date -u "+%s")
                                     aws ecr-public get-login-password --region us-east-1 | docker login -u AWS --password-stdin public.ecr.aws/e7j3v3n0
                                     sg docker -c "
