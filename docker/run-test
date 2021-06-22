@@ -27,26 +27,12 @@ if [[ ${ZEN_FS_MTR} == "yes" ]] && [[ ${DOCKER_OS} == "ubuntu:hirsute" ]] && [[ 
         sudo install --owner=root --group=root --mode=+rx $SCRIPTS_DIR/nullblk-zoned /usr/bin/
         sudo install --owner=root --group=root --mode=+rx $SCRIPTS_DIR/zenfs /usr/bin/
 
-        unset AUX_PATH
-        AUX_PATH=/mnt/zenfs_disk_dir
-
         sudo bash -c 'echo 0 > /sys/kernel/config/nullb/nullb0/power' || true
         sudo rmdir /sys/kernel/config/nullb/nullb0 || true 
-        sudo rm -rf /tmp/zenfs* $AUX_PATH || true
 
         sudo nullblk-zoned 512 128 124 0 32 12 12
         sudo chown 27:27 /dev/nullb0
         sudo chmod 600 /dev/nullb0
-
-
-
-        sudo zenfs mkfs --zbd nullb0 --aux_path $AUX_PATH
-        sudo zenfs ls-uuid
-        sudo zenfs df --zbd nullb0
-        sudo zenfs list --zbd nullb0
-
-        sudo blkzone report /dev/nullb0
-        sudo zbd report /dev/nullb0
 
         ZEN_FS_DOCKER_FLAG="--device=/dev/nullb0"
     else

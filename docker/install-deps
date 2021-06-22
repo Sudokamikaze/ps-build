@@ -228,7 +228,7 @@ if [ -f /usr/bin/apt-get ]; then
     fi
 
     if [[ ${DIST} == "hirsute" ]]; then
-        PKGLIST+=" libzbd-dev clang-12 pkg-config make libgflags-dev"
+        PKGLIST+=" libzbd-dev clang-12 pkg-config make libgflags-dev nvme-cli util-linux fio zbd-utils"
     fi
 
     until apt-get -y install ${PKGLIST}; do
